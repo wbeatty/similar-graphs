@@ -20,7 +20,7 @@ def generate_graph(pair):
 
     db1["date"] = pd.to_datetime(db1["date"], utc=True).dt.date
     db2["date"] = pd.to_datetime(db2["date"], utc=True).dt.date
-    ## Drop the open, high, low, and volume columns
+
     db1.set_index("date", inplace=True)
     db2.set_index("date", inplace=True)
 
