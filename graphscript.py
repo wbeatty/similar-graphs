@@ -1,71 +1,45 @@
 import os
 
-import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
 
 os.makedirs("static/data", exist_ok=True)
 
-## Load the first dataset
-df = pd.read_csv("static/data/AMZN.csv")
-df.drop(columns=["open", "high", "low", "volume"], inplace=True)
-df["date"] = pd.to_datetime(df["date"], utc=True).dt.date
-df.set_index("date", inplace=True)
 
-## Load the second dataset
-sp = pd.read_csv("static/data/SPX.csv")
-sp.rename(
-    columns={"Date": "date", "Close": "close_2", "Adj Close": "adj_close"}, inplace=True
-)
-sp.drop(columns=["Open", "High", "Low", "Volume"], inplace=True)
-sp["date"] = pd.to_datetime(sp["date"], utc=True).dt.date
-sp.set_index("date", inplace=True)
+def generate_graph(pair):
+    db1 = pd.read_csv(f"static/data/{pair[0]}")
+    db2 = pd.read_csv(f"static/data/{pair[1]}")
 
+    index1 = db1.columns[0]
+    index2 = db2.columns[0]
 
-## Normalize the 'adj_close' column for both dataframes
-sp["adj_close_normalized"] = (sp["adj_close"] - sp["adj_close"].min()) / (
-    sp["adj_close"].max() - sp["adj_close"].min()
-)
-df["adj_close_normalized"] = (df["adj_close"] - df["adj_close"].min()) / (
-    df["adj_close"].max() - df["adj_close"].min()
-)
+    data1 = db1.columns[1:]
+    data2 = db2.columns[1:]
 
-## Filter the dataframes to only include the dates that are present in both
-shared_indices = df.index.intersection(sp.index)
-df_filtered = df.loc[shared_indices]
-sp_filtered = sp.loc[shared_indices]
+    db1.rename(columns={index1: "date"}, inplace=True)
+    db2.rename(columns={index2: "date"}, inplace=True)
 
-## Calculate the first and second derivatives for both dataframes
-df_filtered["first_derivative"] = df_filtered["adj_close_normalized"].diff()
-df_filtered["second_derivative"] = df_filtered["first_derivative"].diff()
+    db1["date"] = pd.to_datetime(db1["date"], utc=True).dt.date
+    db2["date"] = pd.to_datetime(db2["date"], utc=True).dt.date
+    ## Drop the open, high, low, and volume columns
+    db1.set_index("date", inplace=True)
+    db2.set_index("date", inplace=True)
 
-sp_filtered["first_derivative"] = sp_filtered["adj_close_normalized"].diff()
-sp_filtered["second_derivative"] = sp_filtered["first_derivative"].diff()
+    shared_indices = db1.index.intersection(db2.index)
 
+    db1_filtered = db1.loc[shared_indices]
+    db2_filtered = db2.loc[shared_indices]
 
-## Merge the dataframes on the shared indices
-merged_second_derivatives = pd.concat(
-    [
-        df_filtered["second_derivative"].rename("AMZN_second_derivative"),
-        sp_filtered["second_derivative"].rename("SPX_second_derivative"),
-        df_filtered["adj_close"].rename("AMZN_adj_close"),
-        sp_filtered["adj_close"].rename("SPX_adj_close"),
-    ],
-    axis=1,
-)
-
-## Drop rows with NaN values
-merged_second_derivatives.dropna(inplace=True)
-
-## Calculate the Mean Squared Error (MSE)
-MSE = np.square(
-    np.subtract(
-        merged_second_derivatives["AMZN_second_derivative"],
-        merged_second_derivatives["SPX_second_derivative"],
+    merged_data = pd.concat(
+        [
+            db1_filtered[data1].rename(pair[0] + "_" + data1),
+            db2_filtered[data2].rename(pair[1] + "_" + data2),
+        ],
+        axis=1,
     )
-).mean()
 
-print(merged_second_derivatives.head())
+    merged_data.dropna(inplace=True)
 
-if MSE < 1:
-    merged_second_derivatives.to_csv("static/data/graph_data.csv")
+    merged_data.to_csv("static/data/merged_data.csv")
+
+    names = [pair[0] + "_" + data1, pair[1] + "_" + data2]
+    return names
