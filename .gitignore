@@ -15,3 +15,4 @@ pip-selfcheck.json
 .Trashes
 ehthumbs.db
 Thumbs.db
+__pycache__/

@@ -1,3 +1,5 @@
 [
-    ["AMZN.csv", "SPX.csv"]
+  ["AMZN.csv", "SPX.csv"],
+  ["TSLA.csv", "SPX.csv"],
+  ["AMZN.csv", "TSLA.csv"]
 ]

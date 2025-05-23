@@ -12,14 +12,16 @@ async function showGraph() {
       myChart.destroy();
     }
 
+    const names = Object.keys(data).filter((key) => key !== "Date");
+
     myChart = new Chart(ctx, {
       type: "line",
       data: {
         labels: data.Date,
         datasets: [
           {
-            label: "AMZN Stock Price",
-            data: data["AMZN Close"],
+            label: names[0],
+            data: data[names[0]],
             backgroundColor: "rgba(255, 99, 132, 0.2)",
             borderColor: "rgba(255, 99, 132, 1)",
             borderWidth: 2,
@@ -27,8 +29,8 @@ async function showGraph() {
             yAxisID: "y",
           },
           {
-            label: "S&P 500 Index",
-            data: data["SPX Close"],
+            label: names[1],
+            data: data[names[1]],
             backgroundColor: "rgba(54, 162, 235, 0.2)",
             borderColor: "rgba(54, 162, 235, 1)",
             borderWidth: 2,
@@ -58,7 +60,7 @@ async function showGraph() {
             beginAtZero: false,
             title: {
               display: true,
-              text: "AMZN Stock Price ($)",
+              text: names[0],
             },
           },
           y1: {
@@ -68,7 +70,7 @@ async function showGraph() {
             beginAtZero: false,
             title: {
               display: true,
-              text: "S&P 500 Index",
+              text: names[1],
             },
             grid: {
               drawOnChartArea: false,
@@ -81,7 +83,7 @@ async function showGraph() {
               label: function (context) {
                 const label = context.dataset.label;
                 const value = context.parsed.y;
-                if (label.includes("AMZN")) {
+                if (label.includes(names[0])) {
                   return `${label}: $${value.toLocaleString(undefined, {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2,

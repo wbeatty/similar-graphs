@@ -12,8 +12,8 @@ def generate_graph(pair):
     index1 = db1.columns[0]
     index2 = db2.columns[0]
 
-    data1 = db1.columns[1:]
-    data2 = db2.columns[1:]
+    data1 = db1.columns[1:].tolist()
+    data2 = db2.columns[1:].tolist()
 
     db1.rename(columns={index1: "date"}, inplace=True)
     db2.rename(columns={index2: "date"}, inplace=True)
@@ -31,8 +31,8 @@ def generate_graph(pair):
 
     merged_data = pd.concat(
         [
-            db1_filtered[data1].rename(pair[0] + "_" + data1),
-            db2_filtered[data2].rename(pair[1] + "_" + data2),
+            db1_filtered[data1[0]].rename(pair[0] + "_" + data1[0]),
+            db2_filtered[data2[0]].rename(pair[1] + "_" + data2[0]),
         ],
         axis=1,
     )
@@ -41,5 +41,5 @@ def generate_graph(pair):
 
     merged_data.to_csv("static/data/merged_data.csv")
 
-    names = [pair[0] + "_" + data1, pair[1] + "_" + data2]
+    names = [pair[0] + "_" + data1[0], pair[1] + "_" + data2[0]]
     return names
